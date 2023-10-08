@@ -1,8 +1,9 @@
-package main
+package state
 
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"os/exec"
 )
 
@@ -27,7 +28,7 @@ type TerraformResource struct {
 }
 
 type TerraformProvider struct {
-	state *TerraformState
+	Data *TerraformState
 }
 
 func NewTerraformProvider() (*TerraformProvider, error) {
@@ -44,6 +45,22 @@ func NewTerraformProvider() (*TerraformProvider, error) {
 	}
 
 	return &TerraformProvider{
-		state: &tfState,
+		Data: &tfState,
+	}, nil
+}
+
+func NewTerraformProviderFromStateOutput(path string) (*TerraformProvider, error) {
+	rawState, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+
+	var tfState TerraformState
+	if err := json.Unmarshal(rawState, &tfState); err != nil {
+		return nil, err
+	}
+
+	return &TerraformProvider{
+		Data: &tfState,
 	}, nil
 }

@@ -1,0 +1,32 @@
+{
+  "format_version": "1.0",
+  "terraform_version": "0.14.3",
+  "values": {
+    "root_module": {
+      "resources": [
+        {
+          "address": "google_service_account.default",
+          "mode": "managed",
+          "type": "google_service_account",
+          "name": "default",
+          "provider_name": "registry.terraform.io/hashicorp/google",
+          "schema_version": 0,
+          "values": {
+            "account_id": "service-account-id",
+            "description": "",
+            "disabled": false,
+            "display_name": "Service Account",
+            "email": "service-account-id@kirecek.iam.gserviceaccount.com",
+            "id": "projects/kirecek/serviceAccounts/service-account-id@kirecek.iam.gserviceaccount.com",
+            "member": "serviceAccount:service-account-id@kirecek.iam.gserviceaccount.com",
+            "name": "projects/kirecek/serviceAccounts/service-account-id@kirecek.iam.gserviceaccount.com",
+            "project": "kirecek",
+            "timeouts": null,
+            "unique_id": "107155228018049307324"
+          },
+          "sensitive_values": {}
+        }
+      ]
+    }
+  }
+}

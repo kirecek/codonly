@@ -1,4 +1,4 @@
-module github.com/kirecek/cleancloud
+module github.com/kirecek/codonly
 
 go 1.21.1
 
