@@ -5,7 +5,7 @@ type StateProvider interface {
 }
 
 type Resource struct {
-	IDKey   string
+	IDKey   *string
 	IDValue string
 	Type    string
 }

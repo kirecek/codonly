@@ -17,11 +17,11 @@ func TestTerraformProvider(t *testing.T) {
 		expected bool
 	}{
 		"testdata contain sql-instance": {
-			r:        &Resource{IDKey: "id", IDValue: "test-instance", Type: "google_sql_database_instance"},
+			r:        &Resource{IDValue: "test-instance", Type: "google_sql_database_instance"},
 			expected: true,
 		},
 		"sql instance not present in state": {
-			r:        &Resource{IDKey: "id", IDValue: "non-existing-instance", Type: "google_sql_database_instance"},
+			r:        &Resource{IDValue: "non-existing-instance", Type: "google_sql_database_instance"},
 			expected: false,
 		},
 	}

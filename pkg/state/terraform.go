@@ -69,7 +69,11 @@ func NewTerraformProviderFromStateOutput(path string) (*TerraformProvider, error
 
 func (tf *TerraformProvider) Contains(r *Resource) bool {
 	for _, resource := range tf.data.Values.Module.Resources {
-		if resource.Type == r.Type && resource.Values[r.IDKey].(string) == r.IDValue {
+		key := "id"
+		if r.IDKey != nil {
+			key = *r.IDKey
+		}
+		if resource.Type == r.Type && resource.Values[key].(string) == r.IDValue {
 			return true
 		}
 	}

@@ -18,7 +18,15 @@ func NewGoogleProvider(projectID string) *GCP {
 }
 
 func (g *GCP) ListResources(ctx context.Context) ([]state.Resource, error) {
-	return g.listCloudSQLInstances(ctx)
+	res := make([]state.Resource, 0)
+
+	instances, err := g.listCloudSQLInstances(ctx)
+	if err != nil {
+		return nil, err
+	}
+	res = append(res, instances...)
+
+	return res, nil
 }
 
 func (g *GCP) listCloudSQLInstances(ctx context.Context) ([]state.Resource, error) {
@@ -36,7 +44,6 @@ func (g *GCP) listCloudSQLInstances(ctx context.Context) ([]state.Resource, erro
 
 	for _, instance := range resp.Items {
 		resources = append(resources, state.Resource{
-			IDKey:   "id",
 			IDValue: instance.Name,
 			Type:    "google_sql_database_instance",
 		})
