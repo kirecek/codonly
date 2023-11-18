@@ -2,7 +2,10 @@ package gcp
 
 import (
 	"context"
+	"fmt"
 
+	"cloud.google.com/go/storage"
+	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 
@@ -25,6 +28,12 @@ func (g *GCP) ListResources(ctx context.Context) ([]state.Resource, error) {
 		return nil, err
 	}
 	res = append(res, instances...)
+
+	buckets, err := g.listBuckets(ctx)
+	if err != nil {
+		return nil, err
+	}
+	res = append(res, buckets...)
 
 	return res, nil
 }
@@ -50,5 +59,33 @@ func (g *GCP) listCloudSQLInstances(ctx context.Context) ([]state.Resource, erro
 	}
 
 	return resources, nil
+}
 
+func (g *GCP) listBuckets(ctx context.Context) ([]state.Resource, error) {
+	svc, err := storage.NewClient(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("storage.NewClient: %w", err)
+	}
+
+	idKey := "name"
+
+	resources := make([]state.Resource, 0)
+	it := svc.Buckets(ctx, g.projectID)
+
+	for {
+		battrs, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return nil, err
+		}
+		resources = append(resources, state.Resource{
+			IDKey:   &idKey,
+			IDValue: battrs.Name,
+			Type:    "google_storage_bucket",
+		})
+	}
+
+	return resources, nil
 }
