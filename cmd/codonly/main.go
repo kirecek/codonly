@@ -14,18 +14,18 @@ import (
 
 func main() {
 	var (
-		sp  state.StateProvider
-		dp  providers.Provider
-		err error
+		stateProvider state.StateProvider
+		dataProvider  providers.Provider
+		err           error
 	)
 
 	statePath := flag.String("state", "", "Path a terraform output")
 	flag.Parse()
 
 	if statePath != nil && *statePath != "" {
-		sp, err = state.NewTerraformProviderFromStateOutput(*statePath)
+		stateProvider, err = state.NewTerraformProviderFromStateOutput(*statePath)
 	} else {
-		sp, err = state.NewTerraformProvider()
+		stateProvider, err = state.NewTerraformProvider()
 	}
 
 	if err != nil {
@@ -33,16 +33,16 @@ func main() {
 	}
 
 	ctx := context.Background()
-	dp = gcp.NewGoogleProvider(os.Getenv("GOOGLE_PROJECT"))
+	dataProvider = gcp.NewGoogleProvider(os.Getenv("GOOGLE_PROJECT"))
 
-	resources, err := dp.ListResources(ctx)
+	resources, err := dataProvider.ListResources(ctx)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
 	for _, resource := range resources {
-		if !sp.Contains(&resource) {
-			fmt.Printf("'%s' is not present in provided state\n", resource.IDValue)
+		if !stateProvider.Contains(&resource) {
+			fmt.Printf("'%s/%s' was not found in state\n", resource.Type, resource.DisplayName)
 		}
 	}
 }

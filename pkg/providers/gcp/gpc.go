@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"cloud.google.com/go/storage"
+	container "google.golang.org/api/container/v1"
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
@@ -35,7 +36,36 @@ func (g *GCP) ListResources(ctx context.Context) ([]state.Resource, error) {
 	}
 	res = append(res, buckets...)
 
+	clusters, err := g.listContainerClusters(ctx)
+	if err != nil {
+		return nil, err
+	}
+	res = append(res, clusters...)
+
 	return res, nil
+}
+
+func (g *GCP) listContainerClusters(ctx context.Context) ([]state.Resource, error) {
+	svc, err := container.NewService(ctx, option.WithScopes(container.CloudPlatformScope))
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := svc.Projects.Locations.Clusters.List(fmt.Sprintf("projects/%s/locations/-", g.projectID)).Context(ctx).Do()
+	if err != nil {
+		return nil, err
+	}
+
+	resources := make([]state.Resource, 0)
+	for _, cluster := range resp.Clusters {
+		resources = append(resources, state.Resource{
+			IDValue:     cluster.Id,
+			Type:        "google_container_cluster",
+			DisplayName: cluster.Name,
+		})
+	}
+
+	return resources, nil
 }
 
 func (g *GCP) listCloudSQLInstances(ctx context.Context) ([]state.Resource, error) {
@@ -44,7 +74,7 @@ func (g *GCP) listCloudSQLInstances(ctx context.Context) ([]state.Resource, erro
 		return nil, err
 	}
 
-	resp, err := svc.Instances.List(g.projectID).Do()
+	resp, err := svc.Instances.List(g.projectID).Context(ctx).Do()
 	if err != nil {
 		return nil, err
 	}
@@ -53,8 +83,9 @@ func (g *GCP) listCloudSQLInstances(ctx context.Context) ([]state.Resource, erro
 
 	for _, instance := range resp.Items {
 		resources = append(resources, state.Resource{
-			IDValue: instance.Name,
-			Type:    "google_sql_database_instance",
+			IDValue:     instance.Name,
+			Type:        "google_sql_database_instance",
+			DisplayName: instance.Name,
 		})
 	}
 
@@ -81,9 +112,10 @@ func (g *GCP) listBuckets(ctx context.Context) ([]state.Resource, error) {
 			return nil, err
 		}
 		resources = append(resources, state.Resource{
-			IDKey:   &idKey,
-			IDValue: battrs.Name,
-			Type:    "google_storage_bucket",
+			IDKey:       &idKey,
+			IDValue:     battrs.Name,
+			Type:        "google_storage_bucket",
+			DisplayName: battrs.Name,
 		})
 	}
 

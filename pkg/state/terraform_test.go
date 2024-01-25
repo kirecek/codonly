@@ -7,7 +7,6 @@ import (
 )
 
 func TestTerraformProvider(t *testing.T) {
-
 	provider, err := NewTerraformProviderFromStateOutput("./testdata/state.output.json")
 	assert.Nil(t, err)
 

@@ -33,7 +33,8 @@ type TerraformProvider struct {
 	data *terraformState
 }
 
-func NewTerraformProvider() (*TerraformProvider, error) {
+// NewTerraformProvider uses terraform binary to read terraform state into typed structure.
+func NewTerraformProvider() (StateProvider, error) {
 	showCmd := exec.Command("terraform", "show", "-json")
 
 	rawState, err := showCmd.Output()
@@ -51,7 +52,8 @@ func NewTerraformProvider() (*TerraformProvider, error) {
 	}, nil
 }
 
-func NewTerraformProviderFromStateOutput(path string) (*TerraformProvider, error) {
+// NewTerraformProviderFromStateOutput reads terraform json state from a given file path.
+func NewTerraformProviderFromStateOutput(path string) (StateProvider, error) {
 	rawState, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
@@ -67,6 +69,7 @@ func NewTerraformProviderFromStateOutput(path string) (*TerraformProvider, error
 	}, nil
 }
 
+// Contains checks if a given Resource exists in terraform state.
 func (tf *TerraformProvider) Contains(r *Resource) bool {
 	for _, resource := range tf.data.Values.Module.Resources {
 		key := "id"
