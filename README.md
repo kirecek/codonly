@@ -1,18 +1,12 @@
 # Cod(e)Only
 
-:warning: WIP!!!
+Codonly helps to find resources that are not part of infrastructure management tooling.
 
-Codonly is a simple project that helps to follow Infrastructure as a code (IaaC) prinple and also detect hanging resources in cloud or other third party envronments.
+:warning: Don't use this for any serious use-cases.
 
-## Why?
+## How does codonly work?
 
-I like to click around in cloud UIs and then when bills arive i'm usually pretty sad after realisation that I forgot to clean up resources I created.
-
-Simply said, codonly helps to find resources that are not part of infrastructure management tooling.
-
-## How?
-
-Codonly uses IaaC tool (currently terraform) binary or directly state text file to read resources present in the state. After the state is loaded, codonly
-uses APIs of a selected provider to read all possible resources and simply checks if they are in the state.
-
-![](.imgs/how-it-works.png)
+1. Read and parse terraform state
+2. List resources (databases, k8s clusters, buckets, ....) from third parties
+3. Check what resources are not part of the state file
+4. Report
