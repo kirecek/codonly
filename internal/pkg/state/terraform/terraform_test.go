@@ -1,26 +1,27 @@
-package state
+package terraform
 
 import (
 	"testing"
 
+	"github.com/kirecek/codonly/internal/pkg/state"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestTerraformProvider(t *testing.T) {
-	provider, err := NewTerraformProviderFromStateOutput("./testdata/state.output.json")
+	provider, err := NewFromStateOutput("./testdata/state.output.json")
 	assert.Nil(t, err)
 
 	tt := map[string]struct {
 		name     string
-		r        *Resource
+		r        *state.Resource
 		expected bool
 	}{
 		"testdata contain sql-instance": {
-			r:        &Resource{IDValue: "test-instance", Type: "google_sql_database_instance"},
+			r:        &state.Resource{IDValue: "test-instance", Type: "google_sql_database_instance"},
 			expected: true,
 		},
 		"sql instance not present in state": {
-			r:        &Resource{IDValue: "non-existing-instance", Type: "google_sql_database_instance"},
+			r:        &state.Resource{IDValue: "non-existing-instance", Type: "google_sql_database_instance"},
 			expected: false,
 		},
 	}

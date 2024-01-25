@@ -3,9 +3,9 @@ package providers
 import (
 	"context"
 
-	"github.com/kirecek/codonly/pkg/state"
+	"github.com/kirecek/codonly/internal/pkg/state"
 )
 
-type Provider interface {
+type DataProvider interface {
 	ListResources(context.Context) ([]state.Resource, error)
 }

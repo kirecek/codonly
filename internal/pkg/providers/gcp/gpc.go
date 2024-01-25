@@ -5,22 +5,25 @@ import (
 	"fmt"
 
 	"cloud.google.com/go/storage"
+	"github.com/kirecek/codonly/internal/pkg/providers"
+	"github.com/kirecek/codonly/internal/pkg/state"
 	container "google.golang.org/api/container/v1"
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
-
-	"github.com/kirecek/codonly/pkg/state"
 )
 
+// GCP represents a provider for google cloud platform resources.
 type GCP struct {
 	projectID string
 }
 
-func NewGoogleProvider(projectID string) *GCP {
+// NewGoogleProvider returns a GCP struct.
+func NewGoogleProvider(projectID string) providers.DataProvider {
 	return &GCP{projectID: projectID}
 }
 
+// ListResources wraps a data fetched from google cloud into codonly resource objects.
 func (g *GCP) ListResources(ctx context.Context) ([]state.Resource, error) {
 	res := make([]state.Resource, 0)
 

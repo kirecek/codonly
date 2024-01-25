@@ -3,19 +3,20 @@ package main
 import (
 	"context"
 	"flag"
-	"fmt"
 	"log"
 	"os"
 
-	"github.com/kirecek/codonly/pkg/providers"
-	"github.com/kirecek/codonly/pkg/providers/gcp"
-	"github.com/kirecek/codonly/pkg/state"
+	"github.com/kirecek/codonly/internal/pkg/codonly"
+	"github.com/kirecek/codonly/internal/pkg/providers"
+	"github.com/kirecek/codonly/internal/pkg/providers/gcp"
+	"github.com/kirecek/codonly/internal/pkg/state"
+	"github.com/kirecek/codonly/internal/pkg/state/terraform"
 )
 
 func main() {
 	var (
-		stateProvider state.StateProvider
-		dataProvider  providers.Provider
+		stateProvider state.State
+		dataProvider  providers.DataProvider
 		err           error
 	)
 
@@ -23,9 +24,9 @@ func main() {
 	flag.Parse()
 
 	if statePath != nil && *statePath != "" {
-		stateProvider, err = state.NewTerraformProviderFromStateOutput(*statePath)
+		stateProvider, err = terraform.NewFromStateOutput(*statePath)
 	} else {
-		stateProvider, err = state.NewTerraformProvider()
+		stateProvider, err = terraform.New()
 	}
 
 	if err != nil {
@@ -35,14 +36,6 @@ func main() {
 	ctx := context.Background()
 	dataProvider = gcp.NewGoogleProvider(os.Getenv("GOOGLE_PROJECT"))
 
-	resources, err := dataProvider.ListResources(ctx)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	for _, resource := range resources {
-		if !stateProvider.Contains(&resource) {
-			fmt.Printf("'%s/%s' was not found in state\n", resource.Type, resource.DisplayName)
-		}
-	}
+	codonly := codonly.New(stateProvider, dataProvider)
+	codonly.Run(ctx)
 }

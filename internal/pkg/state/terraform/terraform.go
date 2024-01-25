@@ -1,10 +1,12 @@
-package state
+package terraform
 
 import (
 	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
+
+	"github.com/kirecek/codonly/internal/pkg/state"
 )
 
 // terraformState is JSON representation of terraform show command.
@@ -29,12 +31,12 @@ type terraformResource struct {
 	Values       map[string]interface{}
 }
 
-type TerraformProvider struct {
+type tfStateWrapper struct {
 	data *terraformState
 }
 
 // NewTerraformProvider uses terraform binary to read terraform state into typed structure.
-func NewTerraformProvider() (StateProvider, error) {
+func New() (state.State, error) {
 	showCmd := exec.Command("terraform", "show", "-json")
 
 	rawState, err := showCmd.Output()
@@ -47,13 +49,13 @@ func NewTerraformProvider() (StateProvider, error) {
 		return nil, err
 	}
 
-	return &TerraformProvider{
+	return &tfStateWrapper{
 		data: &tfState,
 	}, nil
 }
 
 // NewTerraformProviderFromStateOutput reads terraform json state from a given file path.
-func NewTerraformProviderFromStateOutput(path string) (StateProvider, error) {
+func NewFromStateOutput(path string) (state.State, error) {
 	rawState, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
@@ -64,13 +66,13 @@ func NewTerraformProviderFromStateOutput(path string) (StateProvider, error) {
 		return nil, err
 	}
 
-	return &TerraformProvider{
+	return &tfStateWrapper{
 		data: &tfState,
 	}, nil
 }
 
 // Contains checks if a given Resource exists in terraform state.
-func (tf *TerraformProvider) Contains(r *Resource) bool {
+func (tf *tfStateWrapper) Contains(r *state.Resource) bool {
 	for _, resource := range tf.data.Values.Module.Resources {
 		key := "id"
 		if r.IDKey != nil {
